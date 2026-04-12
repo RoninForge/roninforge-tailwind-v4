@@ -18,7 +18,7 @@ Reference list of all patterns the validation skill should detect.
 | shadow-sm | `\bshadow-sm\b` | `shadow-xs` | High |
 | blur-sm | `\bblur-sm\b` | `blur-xs` | High |
 | rounded-sm | `\brounded-sm\b` | `rounded-xs` | High |
-| outline-none | `\boutline-none\b` | `outline-hidden` | High |
+| outline-none | `\boutline-none\b` | `outline-hidden` (preferred for a11y) | Low |
 | overflow-ellipsis | `\boverflow-ellipsis\b` | `text-ellipsis` | High |
 | flex-grow (not -0) | `\bflex-grow\b(?!-0)` | `grow` | High |
 | flex-grow-0 | `\bflex-grow-0\b` | `grow-0` | High |

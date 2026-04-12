@@ -108,17 +108,17 @@ Square brackets are still used for arbitrary values that are not CSS variables:
 
 ## Renamed Utility Classes
 
-These v3 class names no longer exist in v4:
+These v3 class names were renamed in v4. Use the v4 names in new code:
 
-| v3 (do not use) | v4 (use this) |
-|------------------|---------------|
+| v3 | v4 |
+|----|-----|
 | `shadow-sm` | `shadow-xs` |
 | `shadow` | `shadow-sm` |
 | `blur-sm` | `blur-xs` |
 | `blur` | `blur-sm` |
 | `rounded-sm` | `rounded-xs` |
 | `rounded` | `rounded-sm` |
-| `outline-none` | `outline-hidden` |
+| `outline-none` | `outline-hidden` (preferred for accessibility; `outline-none` still works) |
 | `overflow-ellipsis` | `text-ellipsis` |
 | `flex-grow` | `grow` |
 | `flex-grow-0` | `grow-0` |

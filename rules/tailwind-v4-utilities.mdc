@@ -19,7 +19,7 @@ When you are about to write any of these v3 classes, use the v4 replacement inst
 | `blur` | `blur-sm` |
 | `rounded-sm` | `rounded-xs` |
 | `rounded` | `rounded-sm` |
-| `outline-none` | `outline-hidden` |
+| `outline-none` | `outline-hidden` (preferred; `outline-none` still works but lacks forced-colors support) |
 | `overflow-ellipsis` | `text-ellipsis` |
 | `flex-grow` | `grow` |
 | `flex-grow-0` | `grow-0` |
@@ -206,7 +206,7 @@ Prefer `gap` with flex/grid over `space-*` and `divide-*`:
 </div>
 ```
 
-Note: v4 changed `space-*`/`divide-*` selectors from `:not([hidden])` to `:not(:last-child)`, which changes behavior when hidden elements are present.
+Note: v4 changed `space-*`/`divide-*` selectors to no longer exclude hidden elements, meaning a hidden sibling will still create spacing.
 
 ## Color Scheme Utility
 

@@ -10,7 +10,7 @@ Use these rules when migrating an existing Tailwind v3 project to v4. For a full
 
 **Browser requirement:** v4 requires Safari 16.4+, Chrome 111+, Firefox 128+. If the project needs older browser support, stay on v3.4.x.
 
-**Node.js requirement:** v4 needs Node.js 20+.
+**Node.js requirement:** The `@tailwindcss/upgrade` tool requires Node.js 20+. Tailwind v4 itself supports Node.js 18+.
 
 ## Automated Upgrade Tool
 

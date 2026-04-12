@@ -46,7 +46,7 @@ Use this skill when:
    - `shadow-sm` (should be `shadow-xs`)
    - `blur-sm` (should be `blur-xs`)
    - `rounded-sm` (should be `rounded-xs`)
-   - `outline-none` (should be `outline-hidden`)
+   - `outline-none` (prefer `outline-hidden` for accessibility; `outline-none` still works)
    - `overflow-ellipsis` (should be `text-ellipsis`)
    - `flex-grow` / `flex-shrink` (should be `grow` / `shrink`)
 
