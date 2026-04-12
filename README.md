@@ -1,5 +1,9 @@
 # roninforge-tailwind-v4
 
+[![Validate Plugin](https://github.com/RoninForge/roninforge-tailwind-v4/actions/workflows/validate.yml/badge.svg)](https://github.com/RoninForge/roninforge-tailwind-v4/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release](https://img.shields.io/github/v/release/RoninForge/roninforge-tailwind-v4)](https://github.com/RoninForge/roninforge-tailwind-v4/releases)
+
 Cursor plugin for Tailwind CSS v4. Prevents v3 hallucinations with verified v4 patterns, migration skills, and anti-pattern detection.
 
 ## The Problem
