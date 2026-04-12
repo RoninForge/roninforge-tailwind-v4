@@ -1,0 +1,259 @@
+---
+description: "Core Tailwind CSS v4 rules. Enforces correct v4 syntax and prevents common v3 fallbacks. Attach to all conversations involving Tailwind CSS."
+alwaysApply: true
+---
+
+# Tailwind CSS v4 Rules
+
+You are working with **Tailwind CSS v4**, not v3. v4 is a ground-up rewrite with breaking changes. Your training data likely contains mostly v3 patterns. Follow these rules exactly.
+
+## Import Syntax
+
+Always use the single import:
+```css
+@import "tailwindcss";
+```
+
+Never use the old v3 directives:
+```css
+/* WRONG - v3 syntax, does not work in v4 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+## Configuration is CSS-First
+
+Define design tokens with `@theme`, not `tailwind.config.js`:
+
+```css
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #ff6a00;
+  --color-surface: #0a0a0a;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+```
+
+Only use `@config "../../tailwind.config.js"` when migrating a legacy project that still needs the JS config. For new projects, never create a `tailwind.config.js`.
+
+## Build Tool Setup
+
+Prefer the Vite plugin (zero-config):
+```ts
+// vite.config.ts
+import tailwindcss from "@tailwindcss/vite";
+export default defineConfig({
+  plugins: [tailwindcss()],
+});
+```
+
+PostCSS alternative (only if not using Vite):
+```js
+// postcss.config.mjs
+export default {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+```
+
+Never add `autoprefixer` or `postcss-import` - Tailwind v4 handles both internally.
+
+## Content Detection
+
+v4 automatically detects template files by scanning everything not in `.gitignore`. No `content` array needed.
+
+To include paths outside the project (e.g., a UI library in node_modules):
+```css
+@source "../node_modules/@acmecorp/ui-lib";
+```
+
+To exclude paths:
+```css
+@source not "../src/legacy";
+```
+
+## Important Modifier Position
+
+The `!` important modifier goes at the **end** of the class, not the beginning:
+
+```html
+<!-- CORRECT v4 -->
+<div class="p-4!"></div>
+
+<!-- WRONG v3 -->
+<div class="!p-4"></div>
+```
+
+## Arbitrary CSS Variable Syntax
+
+Use parentheses, not square brackets, for CSS variable references:
+
+```html
+<!-- CORRECT v4 -->
+<div class="bg-(--brand-color)"></div>
+
+<!-- WRONG v3 -->
+<div class="bg-[--brand-color]"></div>
+```
+
+Square brackets are still used for arbitrary values that are not CSS variables:
+```html
+<div class="w-[200px]"></div>
+<div class="text-[#ff6a00]"></div>
+```
+
+## Renamed Utility Classes
+
+These v3 class names no longer exist in v4:
+
+| v3 (do not use) | v4 (use this) |
+|------------------|---------------|
+| `shadow-sm` | `shadow-xs` |
+| `shadow` | `shadow-sm` |
+| `blur-sm` | `blur-xs` |
+| `blur` | `blur-sm` |
+| `rounded-sm` | `rounded-xs` |
+| `rounded` | `rounded-sm` |
+| `outline-none` | `outline-hidden` |
+| `overflow-ellipsis` | `text-ellipsis` |
+| `flex-grow` | `grow` |
+| `flex-grow-0` | `grow-0` |
+| `flex-shrink` | `shrink` |
+| `flex-shrink-0` | `shrink-0` |
+
+## Removed Opacity Utilities
+
+Separate opacity utilities are removed. Use the `/` opacity modifier instead:
+
+```html
+<!-- CORRECT v4 -->
+<div class="bg-red-500/50"></div>
+<div class="text-gray-600/75"></div>
+<div class="border-gray-300/30"></div>
+
+<!-- WRONG v3 - these classes do not exist in v4 -->
+<div class="bg-red-500 bg-opacity-50"></div>
+<div class="text-gray-600 text-opacity-75"></div>
+```
+
+## Default Border Color Changed
+
+`border` no longer defaults to gray-200. It defaults to `currentColor`. Always specify a border color:
+
+```html
+<!-- CORRECT v4 -->
+<div class="border border-gray-200"></div>
+
+<!-- INCORRECT - border will be currentColor, not gray -->
+<div class="border"></div>
+```
+
+## Default Ring Changed
+
+`ring` now defaults to `1px` width and `currentColor` (was 3px blue-500 in v3). Always specify width and color:
+
+```html
+<!-- CORRECT v4 -->
+<div class="ring-3 ring-blue-500"></div>
+
+<!-- INCORRECT - 1px currentColor ring, not 3px blue -->
+<div class="ring"></div>
+```
+
+## Transform Class Removed
+
+The `transform` class no longer exists. Transform properties apply automatically:
+
+```html
+<!-- CORRECT v4 -->
+<div class="scale-75 rotate-45"></div>
+
+<!-- WRONG v3 -->
+<div class="transform scale-75 rotate-45"></div>
+```
+
+To reset transforms, use individual utilities with a value of `0` or `100%` as appropriate:
+```html
+<div class="scale-100 rotate-0 translate-x-0 translate-y-0"></div>
+```
+
+## Custom Utilities
+
+Use `@utility` for custom utility classes:
+
+```css
+/* CORRECT v4 */
+@utility tab-4 {
+  tab-size: 4;
+}
+
+/* WRONG v3 */
+@layer utilities {
+  .tab-4 {
+    tab-size: 4;
+  }
+}
+```
+
+## Custom Variants
+
+Register custom variants with `@custom-variant`:
+
+```css
+@custom-variant theme-dark (&:where([data-theme="dark"] *));
+```
+
+Use `@variant` in custom CSS to apply existing variants:
+```css
+.card {
+  background: white;
+  @variant dark {
+    background: #1a1a1a;
+  }
+}
+```
+
+## Preflight Changes
+
+Be aware of these base style changes in v4:
+- **Buttons** use `cursor: default`, not `cursor: pointer`. Add `cursor-pointer` explicitly if needed.
+- **Placeholder** color is 50% opacity of `currentColor`, not a fixed gray.
+- **`[hidden]`** attribute enforces `display: none !important` and cannot be overridden.
+
+## Class Names Must Be Static
+
+Tailwind scans source files at build time. Dynamic class construction breaks detection:
+
+```html
+<!-- WRONG - Tailwind cannot detect these -->
+<div class="text-{{ error ? 'red' : 'green' }}-600"></div>
+<div :class="`bg-${color}-500`"></div>
+
+<!-- CORRECT - full class names as static strings -->
+<div :class="error ? 'text-red-600' : 'text-green-600'"></div>
+```
+
+## Theme Values as CSS Variables
+
+All theme values are exposed as CSS variables. Use them in custom CSS:
+
+```css
+.card {
+  padding: var(--spacing-6);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+}
+```
+
+Prefer CSS variables over the deprecated `theme()` function:
+```css
+/* CORRECT v4 */
+.element { margin: var(--spacing-4); }
+
+/* DEPRECATED */
+.element { margin: theme(spacing.4); }
+```

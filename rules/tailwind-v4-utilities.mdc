@@ -1,0 +1,218 @@
+---
+description: "Tailwind CSS v4 utility class rules for template and markup files. Covers renamed classes, new utilities, container queries, gradients, and accessibility patterns."
+globs: ["*.html", "*.jsx", "*.tsx", "*.vue", "*.svelte", "*.blade.php", "*.erb", "*.astro", "*.templ", "*.hbs"]
+---
+
+# Tailwind v4 Utility Classes
+
+These rules apply when writing markup with Tailwind utility classes.
+
+## Utility Renames Quick Reference
+
+When you are about to write any of these v3 classes, use the v4 replacement instead:
+
+| Instead of (v3) | Write (v4) |
+|------------------|------------|
+| `shadow-sm` | `shadow-xs` |
+| `shadow` | `shadow-sm` |
+| `blur-sm` | `blur-xs` |
+| `blur` | `blur-sm` |
+| `rounded-sm` | `rounded-xs` |
+| `rounded` | `rounded-sm` |
+| `outline-none` | `outline-hidden` |
+| `overflow-ellipsis` | `text-ellipsis` |
+| `flex-grow` | `grow` |
+| `flex-grow-0` | `grow-0` |
+| `flex-shrink` | `shrink` |
+| `flex-shrink-0` | `shrink-0` |
+| `ring` (bare) | `ring-3` (explicit width, v3 default was 3px) |
+| `border` (bare, for gray) | `border border-gray-200` (explicit) |
+| `transform scale-75` | `scale-75` (no `transform` prefix) |
+| `transform-none` | `scale-100 rotate-0 translate-x-0 translate-y-0` |
+
+## Opacity Always Uses the / Modifier
+
+```html
+<!-- Background opacity -->
+<div class="bg-black/50"></div>
+<div class="bg-blue-500/75"></div>
+
+<!-- Text opacity -->
+<p class="text-white/80"></p>
+
+<!-- Border opacity -->
+<div class="border border-gray-300/50"></div>
+
+<!-- Ring opacity -->
+<div class="ring-2 ring-blue-500/50"></div>
+```
+
+Never use `bg-opacity-*`, `text-opacity-*`, `border-opacity-*`, or any other `-opacity-` utility.
+
+## Container Queries (Built-in)
+
+Container queries are native in v4 - no plugin needed:
+
+```html
+<div class="@container">
+  <div class="grid grid-cols-1 @sm:grid-cols-2 @lg:grid-cols-3">
+    <div class="p-4">Responsive to container, not viewport</div>
+  </div>
+</div>
+```
+
+Named containers:
+```html
+<div class="@container/sidebar">
+  <div class="@sm/sidebar:grid-cols-2">...</div>
+</div>
+```
+
+Available sizes: `@3xs` (8rem), `@2xs` (12rem), `@xs` (16rem), `@sm` (20rem), `@md` (24rem), `@lg` (28rem), `@xl` (32rem), `@2xl` (36rem), `@3xl` (40rem), `@4xl` (44rem), `@5xl` (48rem), `@6xl` (52rem), `@7xl` (56rem).
+
+## Gradient Syntax
+
+Linear gradients with explicit angles:
+```html
+<div class="bg-linear-45 from-indigo-500 via-purple-500 to-pink-500"></div>
+<div class="bg-linear-to-r from-red-500 to-blue-500"></div>
+```
+
+Gradient color interpolation:
+```html
+<!-- OKLCH produces more vivid gradients -->
+<div class="bg-linear-to-r/oklch from-blue-500 to-green-500"></div>
+
+<!-- sRGB (default) -->
+<div class="bg-linear-to-r/srgb from-blue-500 to-green-500"></div>
+```
+
+Radial gradients:
+```html
+<div class="bg-radial-[at_25%_25%] from-white to-zinc-900"></div>
+```
+
+Conic gradients:
+```html
+<div class="bg-conic from-red-500 via-yellow-500 to-red-500"></div>
+```
+
+## 3D Transforms
+
+```html
+<div class="perspective-distant">
+  <div class="rotate-x-12 rotate-y-6 transform-3d">
+    3D transformed content
+  </div>
+</div>
+```
+
+## New Inset Shadows and Rings
+
+Multi-layer shadow composition:
+```html
+<!-- Inset shadow -->
+<div class="inset-shadow-xs"></div>
+<div class="inset-shadow-sm"></div>
+
+<!-- Inset ring (border-like but composable) -->
+<div class="inset-ring inset-ring-gray-300"></div>
+```
+
+These compose with regular shadows:
+```html
+<div class="shadow-sm inset-shadow-xs inset-ring inset-ring-white/10">
+  Multiple shadow layers
+</div>
+```
+
+## Field Sizing (Auto-Resize)
+
+```html
+<textarea class="field-sizing-content" placeholder="Grows with content"></textarea>
+<input class="field-sizing-content" value="Shrinks and grows" />
+```
+
+## New Variants
+
+`not-*` variant:
+```html
+<div class="not-hover:opacity-75"></div>
+<div class="not-last:border-b"></div>
+<div class="not-supports-[display:grid]:flex"></div>
+```
+
+`nth-*` variants:
+```html
+<div class="nth-1:bg-red-500">First</div>
+<div class="nth-odd:bg-gray-50">Odd rows</div>
+<div class="nth-even:bg-white">Even rows</div>
+<div class="nth-3n:font-bold">Every third</div>
+```
+
+`inert` variant:
+```html
+<div inert class="inert:opacity-50 inert:pointer-events-none">
+  Non-interactive section
+</div>
+```
+
+`starting` variant (for entry animations without JS):
+```html
+<div popover class="opacity-100 transition-opacity starting:open:opacity-0">
+  Animates from 0 to 100% on open
+</div>
+```
+
+## Accessible Patterns
+
+Always include focus-visible styles:
+```html
+<button class="cursor-pointer rounded-sm bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-hidden">
+  Accessible button
+</button>
+```
+
+Use `sr-only` for screen reader text:
+```html
+<button>
+  <svg>...</svg>
+  <span class="sr-only">Close menu</span>
+</button>
+```
+
+Use semantic color naming via `@theme` for consistent accessible contrast:
+```html
+<!-- Prefer semantic names over raw colors -->
+<p class="text-muted">Secondary text with consistent contrast</p>
+<div class="bg-surface-raised">Card with semantic background</div>
+```
+
+## Spacing Preference: Gap Over Space/Divide
+
+Prefer `gap` with flex/grid over `space-*` and `divide-*`:
+
+```html
+<!-- PREFERRED in v4 -->
+<div class="flex flex-col gap-4">
+  <div>Item 1</div>
+  <div>Item 2</div>
+</div>
+
+<!-- STILL WORKS but less reliable with hidden elements -->
+<div class="space-y-4">
+  <div>Item 1</div>
+  <div>Item 2</div>
+</div>
+```
+
+Note: v4 changed `space-*`/`divide-*` selectors from `:not([hidden])` to `:not(:last-child)`, which changes behavior when hidden elements are present.
+
+## Color Scheme Utility
+
+Control the browser's color scheme for scrollbars and form controls:
+```html
+<html class="color-scheme-dark">
+  <!-- Scrollbars, form controls, etc. use dark theme -->
+</html>
+```

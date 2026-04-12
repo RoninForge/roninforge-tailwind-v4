@@ -1,0 +1,21 @@
+{
+  "name": "roninforge-tailwind-v4",
+  "version": "1.0.0",
+  "description": "Verified Tailwind CSS v4 rules, migration skills, and anti-pattern detection for Cursor. Prevents v3 hallucinations with grounded v4 patterns.",
+  "author": {
+    "name": "RoninForge",
+    "url": "https://roninforge.org"
+  },
+  "homepage": "https://github.com/RoninForge/roninforge-tailwind-v4",
+  "repository": "https://github.com/RoninForge/roninforge-tailwind-v4",
+  "license": "MIT",
+  "keywords": [
+    "tailwind",
+    "tailwindcss",
+    "v4",
+    "css",
+    "migration",
+    "frontend",
+    "upgrade"
+  ]
+}

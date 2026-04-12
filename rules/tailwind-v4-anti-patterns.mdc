@@ -1,0 +1,204 @@
+---
+description: "Tailwind CSS v4 anti-pattern detection. Prevents the most common AI-generated mistakes: version mixing, deprecated config patterns, and removed utilities."
+alwaysApply: true
+---
+
+# Tailwind v4 Anti-Patterns
+
+These are the patterns AI models generate most frequently when working with Tailwind v4 projects. Every one of them is wrong. If you catch yourself generating any of these, stop and correct immediately.
+
+## Anti-Pattern 1: Creating tailwind.config.js in a New Project
+
+If starting a new Tailwind v4 project, do NOT create a `tailwind.config.js` or `tailwind.config.ts` file. Configuration lives in CSS:
+
+```css
+/* All config goes here, in your main CSS file */
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3b82f6;
+  --font-sans: "Inter", sans-serif;
+}
+```
+
+The only exception: migrating an existing v3 project where you explicitly need `@config "../../tailwind.config.js"` as a bridge.
+
+## Anti-Pattern 2: Installing Wrong Packages
+
+Do NOT install these v3-era packages:
+- `tailwindcss` as a PostCSS plugin directly (use `@tailwindcss/postcss` or `@tailwindcss/vite`)
+- `autoprefixer` (handled by Tailwind v4 internally)
+- `postcss-import` (handled by Tailwind v4 internally)
+
+Correct v4 installation:
+
+For Vite projects:
+```bash
+npm install -D tailwindcss @tailwindcss/vite
+```
+
+For PostCSS projects:
+```bash
+npm install -D tailwindcss @tailwindcss/postcss
+```
+
+## Anti-Pattern 3: Using @tailwind Directives
+
+```css
+/* WRONG - v3 syntax */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CORRECT - v4 syntax */
+@import "tailwindcss";
+```
+
+## Anti-Pattern 4: Using Opacity Utilities
+
+These classes do not exist in v4:
+- `bg-opacity-*`
+- `text-opacity-*`
+- `border-opacity-*`
+- `divide-opacity-*`
+- `placeholder-opacity-*`
+- `ring-opacity-*`
+
+Always use the `/` modifier syntax: `bg-red-500/50`, `text-white/80`.
+
+## Anti-Pattern 5: Relying on Default Border/Ring Colors
+
+If you write `class="border"` without a color, the border will be `currentColor` in v4 (not gray-200 as in v3). Same for `ring` (1px currentColor instead of 3px blue-500).
+
+Always be explicit:
+```html
+<div class="border border-gray-200"></div>
+<div class="ring-3 ring-blue-500"></div>
+```
+
+## Anti-Pattern 6: Using Removed Config Options
+
+These `tailwind.config.js` options do not exist in v4:
+- `corePlugins` - cannot disable individual plugins
+- `separator` - only `:` is supported
+- `safelist` - use `@source inline(...)` in CSS instead
+- `content` array - use automatic detection or `@source` directives
+
+## Anti-Pattern 7: Dynamic Class Name Construction
+
+```js
+// WRONG - Tailwind cannot detect dynamically constructed classes
+const color = "red";
+className = `bg-${color}-500`;
+className = `text-${props.variant}-600`;
+
+// CORRECT - use complete static strings
+className = error ? "bg-red-500" : "bg-green-500";
+
+// CORRECT - map objects with full class names
+const variants = {
+  error: "bg-red-500 text-white",
+  success: "bg-green-500 text-white",
+  warning: "bg-yellow-500 text-black",
+};
+className = variants[variant];
+```
+
+## Anti-Pattern 8: Using @layer utilities for Custom Classes
+
+```css
+/* WRONG v3 pattern */
+@layer utilities {
+  .scrollbar-hidden {
+    scrollbar-width: none;
+  }
+}
+
+/* CORRECT v4 pattern */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+}
+```
+
+## Anti-Pattern 9: Using theme() Function
+
+```css
+/* DEPRECATED */
+.element {
+  padding: theme("spacing.4");
+  color: theme("colors.blue.500");
+}
+
+/* CORRECT - use CSS variables */
+.element {
+  padding: var(--spacing-4);
+  color: var(--color-blue-500);
+}
+```
+
+## Anti-Pattern 10: Variant Stacking in v3 Order
+
+v4 reads compound variant stacks left-to-right (v3 was right-to-left). This only affects compound variants involving selectors like `*`:
+
+```html
+<!-- v4 order (correct) -->
+<div class="*:first:text-red-500"></div>
+
+<!-- v3 order (wrong in v4) -->
+<div class="first:*:text-red-500"></div>
+```
+
+Simple variant chaining is unaffected: `hover:dark:bg-gray-900`, `focus:text-blue-500` work the same in both versions.
+
+## Anti-Pattern 11: Forgetting Cursor Change on Buttons
+
+v4 preflight sets buttons to `cursor: default`. If you expect pointer cursor on buttons, add it explicitly:
+
+```html
+<button class="cursor-pointer bg-blue-500 text-white px-4 py-2">
+  Click me
+</button>
+```
+
+Or restore globally in your CSS:
+```css
+@layer base {
+  button, [role="button"] {
+    cursor: pointer;
+  }
+}
+```
+
+## Anti-Pattern 12: Adding Unnecessary PostCSS Plugins
+
+v4 handles imports, vendor prefixes, and nesting internally. This PostCSS config is wrong:
+
+```js
+// WRONG - unnecessary plugins
+export default {
+  plugins: {
+    "postcss-import": {},
+    "@tailwindcss/postcss": {},
+    autoprefixer: {},
+    "postcss-nesting": {},
+  },
+};
+
+// CORRECT - just Tailwind
+export default {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+```
+
+## How to Detect Version Mixing
+
+If you see ANY of these in a project that uses `@import "tailwindcss"`:
+- A `tailwind.config.js` without a corresponding `@config` directive
+- `@tailwind base/components/utilities` directives
+- `bg-opacity-*` or similar opacity utilities
+- `postcss-import` or `autoprefixer` in PostCSS config
+- `content: [...]` in a config file
+
+The project has version mixing. Flag it and offer to help clean it up with the `/tw-migrate` skill.

@@ -1,0 +1,202 @@
+---
+description: "Tailwind CSS v4 configuration rules for CSS and build tool files. Covers @theme, @source, @import, PostCSS, and Vite plugin setup."
+globs: ["*.css", "*.pcss", "postcss.config.*", "vite.config.*", "tailwind.config.*"]
+---
+
+# Tailwind v4 Configuration
+
+These rules apply when editing CSS files, PostCSS config, Vite config, or Tailwind config files. This rule also auto-attaches to `tailwind.config.*` files - if you see one in a v4 project, it may be a migration artifact that needs conversion to `@theme`.
+
+## The @theme Directive
+
+`@theme` defines design tokens that generate both CSS variables and utility classes:
+
+```css
+@import "tailwindcss";
+
+@theme {
+  /* Colors - generates bg-brand, text-brand, border-brand, etc. */
+  --color-brand: #ff6a00;
+  --color-surface: #0a0a0a;
+  --color-surface-raised: #1a1a1a;
+  --color-muted: #737373;
+
+  /* Fonts - generates font-sans, font-mono, etc. */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Spacing - generates p-18, m-18, gap-18, etc. */
+  --spacing-18: 4.5rem;
+  --spacing-128: 32rem;
+
+  /* Border radius - generates rounded-card, etc. */
+  --radius-card: 0.75rem;
+
+  /* Shadows - generates shadow-card, etc. */
+  --shadow-card: 0 2px 8px rgb(0 0 0 / 0.12);
+
+  /* Breakpoints - generates sm:, md:, etc. */
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+```
+
+## Resetting Default Theme Namespaces
+
+Use `initial` to clear a namespace before defining your own values:
+
+```css
+@theme {
+  /* Remove ALL default colors, define only yours */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-brand: #ff6a00;
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-900: #171717;
+}
+```
+
+This is useful for strict brand compliance where default Tailwind colors should not be available.
+
+## The @source Directive
+
+Control which files Tailwind scans for class names:
+
+```css
+@import "tailwindcss";
+
+/* Include a UI library from node_modules */
+@source "../node_modules/@acmecorp/ui-lib";
+
+/* Exclude legacy code from scanning */
+@source not "../src/legacy";
+```
+
+For monorepos, scope scanning to specific directories:
+```css
+@import "tailwindcss" source("../src");
+```
+
+To disable automatic detection entirely:
+```css
+@import "tailwindcss" source(none);
+@source "../admin";
+@source "../shared";
+```
+
+## Force-Generating Specific Classes
+
+Replace the old `safelist` config option with `@source inline()`:
+
+```css
+/* Generate these classes even if not found in source files */
+@source inline("{hover:,focus:,}bg-red-{100..900}");
+@source inline("text-{sm,base,lg,xl,2xl}");
+```
+
+## Loading Legacy JavaScript Config
+
+Only when migrating from v3 and the JS config is still needed:
+
+```css
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+```
+
+Not all v3 config options are supported. Removed options: `corePlugins`, `separator`, `safelist`, `content`.
+
+## Loading JavaScript Plugins
+
+First-party plugins use `@plugin`:
+
+```css
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+```
+
+Note: `@tailwindcss/container-queries` is no longer needed - container queries are built into v4.
+
+## PostCSS Configuration
+
+If using PostCSS (not Vite), the config is minimal:
+
+```js
+// postcss.config.mjs
+export default {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+```
+
+Do NOT add `postcss-import`, `autoprefixer`, or `postcss-nesting`. Tailwind v4 handles all three internally.
+
+## Vite Plugin (Recommended)
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
+
+export default defineConfig({
+  plugins: [tailwindcss()],
+});
+```
+
+No PostCSS config file needed when using the Vite plugin.
+
+## Scoped Styles (@reference)
+
+For component frameworks with scoped styles (Vue, Svelte), use `@reference` to access Tailwind utilities without duplicating the full CSS:
+
+```vue
+<style scoped>
+  @reference "tailwindcss";
+
+  h1 {
+    @apply text-2xl font-bold text-red-500;
+  }
+</style>
+```
+
+Or reference your app's CSS file:
+```vue
+<style scoped>
+  @reference "../../app.css";
+
+  .card {
+    @apply rounded-lg shadow-sm p-4;
+  }
+</style>
+```
+
+## Dark Mode Configuration
+
+Dark mode works by default via `prefers-color-scheme`. To use class-based or attribute-based dark mode:
+
+```css
+/* Attribute-based (recommended) */
+@custom-variant dark (&:where([data-theme="dark"] *));
+
+/* Class-based */
+@custom-variant dark (&:where(.dark *));
+```
+
+## If You See a tailwind.config.js File
+
+Check whether the project is v3 or v4:
+- If the CSS uses `@import "tailwindcss"` - this is a v4 project. The JS config is either a migration artifact (needs `@config` directive) or should be converted to `@theme`.
+- If the CSS uses `@tailwind base; @tailwind components; @tailwind utilities;` - this is a v3 project. Suggest using the `/tw-migrate` skill.

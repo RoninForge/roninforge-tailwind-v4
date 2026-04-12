@@ -1,0 +1,290 @@
+---
+description: "Tailwind CSS v3-to-v4 migration rules. Activated when the agent determines migration work is needed. Covers step-by-step upgrade process, common pitfalls, and automated migration tooling."
+---
+
+# Tailwind v3 to v4 Migration
+
+Use these rules when migrating an existing Tailwind v3 project to v4. For a full interactive migration workflow, use the `/tw-migrate` skill.
+
+## Before Starting
+
+**Browser requirement:** v4 requires Safari 16.4+, Chrome 111+, Firefox 128+. If the project needs older browser support, stay on v3.4.x.
+
+**Node.js requirement:** v4 needs Node.js 20+.
+
+## Automated Upgrade Tool
+
+Tailwind provides an automated upgrade tool that handles many changes:
+
+```bash
+npx @tailwindcss/upgrade
+```
+
+This tool:
+- Converts `@tailwind` imports to `@import "tailwindcss"`
+- Moves `!` important modifiers to class end
+- Updates arbitrary CSS variable syntax `[--x]` to `(--x)`
+- Renames utility classes (shadow-sm to shadow-xs, etc.)
+- Updates PostCSS config
+- Attempts to convert `tailwind.config.js` to `@theme`
+
+It does NOT handle all edge cases. Manual review is always required after running it.
+
+## Manual Migration Steps
+
+### Step 1: Update Dependencies
+
+```bash
+# Remove v3 packages
+npm uninstall tailwindcss autoprefixer postcss-import
+
+# Install v4 packages (choose one)
+npm install -D tailwindcss @tailwindcss/vite       # Vite projects
+npm install -D tailwindcss @tailwindcss/postcss     # PostCSS projects
+```
+
+### Step 2: Update CSS Entry Point
+
+Replace:
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+With:
+```css
+@import "tailwindcss";
+```
+
+### Step 3: Convert Configuration
+
+Move `tailwind.config.js` theme values to `@theme`:
+
+```js
+// OLD: tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        brand: '#ff6a00',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+    },
+  },
+}
+```
+
+```css
+/* NEW: in your CSS file */
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #ff6a00;
+  --font-sans: "Inter", sans-serif;
+}
+```
+
+If full conversion is not yet practical, bridge with `@config`:
+```css
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+```
+
+### Step 4: Update PostCSS Config
+
+```js
+// OLD
+module.exports = {
+  plugins: {
+    'postcss-import': {},
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+
+// NEW
+export default {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+```
+
+Or remove PostCSS config entirely if using Vite.
+
+### Step 5: Fix Content Configuration
+
+Remove the `content` array from config. v4 auto-detects from `.gitignore`.
+
+If you need to include external paths:
+```css
+@source "../node_modules/@your-lib/components";
+```
+
+If you had a `safelist`:
+```css
+@source inline("{hover:,focus:,}bg-red-{100..900}");
+```
+
+### Step 6: Search and Replace Utility Classes
+
+Run these find-and-replace operations across all template files:
+
+| Find | Replace |
+|------|---------|
+| `shadow-sm` | `shadow-xs` |
+| `blur-sm` | `blur-xs` |
+| `rounded-sm` | `rounded-xs` |
+| `outline-none` | `outline-hidden` |
+| `overflow-ellipsis` | `text-ellipsis` |
+| `flex-grow` (not `flex-grow-0`) | `grow` |
+| `flex-grow-0` | `grow-0` |
+| `flex-shrink` (not `flex-shrink-0`) | `shrink` |
+| `flex-shrink-0` | `shrink-0` |
+
+**Caution:** these renames shift the scale. `shadow-sm` becomes `shadow-xs`, but the OLD `shadow` (default) is now `shadow-sm`. Be precise about which class maps to which.
+
+### Step 7: Replace Opacity Utilities
+
+Search for these patterns and replace:
+
+```
+bg-opacity-{N}    -> use bg-{color}/{N} modifier
+text-opacity-{N}  -> use text-{color}/{N} modifier
+border-opacity-{N} -> use border-{color}/{N} modifier
+divide-opacity-{N} -> use divide-{color}/{N} modifier
+ring-opacity-{N}  -> use ring-{color}/{N} modifier
+placeholder-opacity-{N} -> use placeholder-{color}/{N} modifier
+```
+
+Example:
+```html
+<!-- Before -->
+<div class="bg-blue-500 bg-opacity-50"></div>
+
+<!-- After -->
+<div class="bg-blue-500/50"></div>
+```
+
+### Step 8: Fix Important Modifiers
+
+Search for `!` at the beginning of utility classes and move to the end:
+
+```html
+<!-- Before -->
+<div class="!p-4 !mt-0"></div>
+
+<!-- After -->
+<div class="p-4! mt-0!"></div>
+```
+
+### Step 9: Fix Arbitrary CSS Variable Syntax
+
+Search for `[--` and replace bracket syntax with parentheses:
+
+```html
+<!-- Before -->
+<div class="bg-[--brand]"></div>
+
+<!-- After -->
+<div class="bg-(--brand)"></div>
+```
+
+### Step 10: Update Custom Utilities
+
+```css
+/* Before */
+@layer utilities {
+  .scrollbar-hidden {
+    scrollbar-width: none;
+  }
+}
+
+/* After */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+}
+```
+
+### Step 11: Add Explicit Border/Ring Colors
+
+Search for bare `border` and `ring` classes and add explicit colors:
+
+```html
+<!-- Before (relied on v3 gray-200 default) -->
+<div class="border"></div>
+<div class="ring"></div>
+
+<!-- After -->
+<div class="border border-gray-200"></div>
+<div class="ring-3 ring-blue-500"></div>
+```
+
+### Step 12: Remove transform Prefix
+
+```html
+<!-- Before -->
+<div class="transform scale-75 rotate-45"></div>
+<div class="transform-gpu translate-x-4"></div>
+<div class="transform-none"></div>
+
+<!-- After -->
+<div class="scale-75 rotate-45"></div>
+<div class="translate-x-4"></div>
+<div class="scale-100 rotate-0 translate-x-0 translate-y-0"></div>
+```
+
+### Step 13: Add cursor-pointer to Buttons
+
+v4 removed `cursor: pointer` from button base styles. Add it where needed:
+
+```html
+<button class="cursor-pointer ...">Click me</button>
+```
+
+Or add globally in CSS:
+```css
+@layer base {
+  button, [role="button"] {
+    cursor: pointer;
+  }
+}
+```
+
+### Step 14: Update JavaScript Plugins
+
+Convert `tailwind.config.js` plugins to CSS:
+
+```css
+/* Load first-party plugins */
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+
+/* Container queries plugin is no longer needed - built into v4 */
+/* Remove: @plugin "@tailwindcss/container-queries" */
+```
+
+Simple custom JS plugins can be converted to `@utility`:
+```css
+@utility prose-sm {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+```
+
+### Step 15: Visual Regression Testing
+
+After all changes:
+1. Build the project and verify no build errors
+2. Check all pages visually - pay special attention to:
+   - Border colors (now currentColor by default)
+   - Button cursors (now default, not pointer)
+   - Ring styles (now 1px currentColor by default)
+   - Shadow sizes (shifted by one tier)
+   - Placeholder text color (now relative to text color)
+3. Test dark mode if applicable
+4. Test responsive breakpoints
+5. Check forms and interactive elements
