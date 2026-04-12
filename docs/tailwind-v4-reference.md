@@ -95,7 +95,7 @@ npx @tailwindcss/cli -i input.css -o output.css
 | `divide-opacity-*` | `divide-color/opacity` modifier |
 | `placeholder-opacity-*` | `placeholder-color/opacity` modifier |
 | `transform` class | Automatic (just use scale-*, rotate-*, etc.) |
-| `transform-none` | `scale-100 rotate-0 translate-x-0 translate-y-0` |
+| `transform-none` | `scale-100 rotate-0 translate-x-0 translate-y-0 skew-x-0 skew-y-0` |
 | `transform-gpu` | Automatic (no longer needed) |
 
 ### Default Changes

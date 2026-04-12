@@ -28,7 +28,7 @@ When you are about to write any of these v3 classes, use the v4 replacement inst
 | `ring` (bare) | `ring-3` (explicit width, v3 default was 3px) |
 | `border` (bare, for gray) | `border border-gray-200` (explicit) |
 | `transform scale-75` | `scale-75` (no `transform` prefix) |
-| `transform-none` | `scale-100 rotate-0 translate-x-0 translate-y-0` |
+| `transform-none` | `scale-100 rotate-0 translate-x-0 translate-y-0 skew-x-0 skew-y-0` |
 
 ## Opacity Always Uses the / Modifier
 

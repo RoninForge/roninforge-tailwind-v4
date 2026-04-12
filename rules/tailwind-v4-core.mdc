@@ -178,7 +178,7 @@ The `transform` class no longer exists. Transform properties apply automatically
 
 To reset transforms, use individual utilities with a value of `0` or `100%` as appropriate:
 ```html
-<div class="scale-100 rotate-0 translate-x-0 translate-y-0"></div>
+<div class="scale-100 rotate-0 translate-x-0 translate-y-0 skew-x-0 skew-y-0"></div>
 ```
 
 ## Custom Utilities
